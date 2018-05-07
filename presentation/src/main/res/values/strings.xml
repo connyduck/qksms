@@ -44,7 +44,7 @@
     <string name="main_menu_unarchive">Unarchive</string>
     <string name="main_menu_block">Block</string>
     <string name="main_menu_delete">Delete</string>
-    <string name="main_syncing">Optimizing database, this might take a minute…</string>
+    <string name="main_syncing">Syncing messages…</string>
     <string name="main_sender_you">You: %s</string>
     <string name="inbox_empty_text">Your conversations will appear here</string>
     <string name="inbox_search_empty_text">No results</string>

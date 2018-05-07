@@ -36,14 +36,13 @@ import interactor.MarkArchived
 import interactor.MarkBlocked
 import interactor.MarkUnarchived
 import interactor.MigratePreferences
-import interactor.PartialSync
+import interactor.SyncMessages
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.rxkotlin.withLatestFrom
-import io.realm.Realm
 import manager.RatingManager
-import model.SyncLog
 import repository.MessageRepository
+import repository.SyncRepository
 import util.Preferences
 import util.extensions.removeAccents
 import java.util.concurrent.TimeUnit
@@ -61,9 +60,10 @@ class MainViewModel : QkViewModel<MainView, MainState>(MainState()) {
     @Inject lateinit var markBlocked: MarkBlocked
     @Inject lateinit var migratePreferences: MigratePreferences
     @Inject lateinit var navigator: Navigator
-    @Inject lateinit var partialSync: PartialSync
     @Inject lateinit var prefs: Preferences
     @Inject lateinit var ratingManager: RatingManager
+    @Inject lateinit var syncMessages: SyncMessages
+    @Inject lateinit var syncRepository: SyncRepository
 
     private val conversations by lazy { messageRepo.getConversations() }
 
@@ -78,33 +78,27 @@ class MainViewModel : QkViewModel<MainView, MainState>(MainState()) {
         disposables += markArchived
         disposables += markUnarchived
         disposables += migratePreferences
-        disposables += partialSync
+        disposables += syncMessages
 
-        // If it's the first sync, reflect that in the ViewState
-        disposables += Realm.getDefaultInstance()
-                .where(SyncLog::class.java)
-                .findAll()
-                .asFlowable()
-                .filter { it.isLoaded }
-                .map { it.size == 0 }
-                .doOnNext { if (it) partialSync.execute(Unit) }
+        // Show the syncing UI
+        disposables += syncRepository.syncProgress
                 .distinctUntilChanged()
                 .subscribe { syncing -> newState { it.copy(syncing = syncing) } }
 
+
+        // Show the rating UI
         disposables += ratingManager.shouldShowRating
                 .subscribe { show -> newState { it.copy(showRating = show) } }
 
-        // Migrate the preferences from 2.7.3 if necessary
+
+        // Migrate the preferences from 2.7.3
         migratePreferences.execute(Unit)
 
+
+        // Show setup activity
         val isNotDefaultSms = Telephony.Sms.getDefaultSmsPackage(context) != context.packageName
         val hasSmsPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED
         val hasContactPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED
-
-        if (isNotDefaultSms) {
-            partialSync.execute(Unit)
-        }
-
         if (isNotDefaultSms || !hasSmsPermission || !hasContactPermission) {
             navigator.showSetupActivity()
         }

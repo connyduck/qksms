@@ -53,6 +53,7 @@ import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
 import kotlinx.android.synthetic.main.drawer_view.*
 import kotlinx.android.synthetic.main.main_activity.*
+import repository.SyncRepository
 import javax.inject.Inject
 
 class MainActivity : QkThemedActivity<MainViewModel>(), MainView {
@@ -205,8 +206,7 @@ class MainActivity : QkThemedActivity<MainViewModel>(), MainView {
         toolbar.menu.findItem(R.id.block)?.isVisible = selectedConversations != 0
         toolbar.menu.findItem(R.id.delete)?.isVisible = selectedConversations != 0
 
-        syncing.setVisible(state.syncing)
-        synced.setVisible(!state.syncing)
+        syncing.setVisible(state.syncing is SyncRepository.SyncProgress.Running)
         rateLayout.setVisible(state.showRating)
 
         compose.setVisible(state.page is Inbox || state.page is Archived)
