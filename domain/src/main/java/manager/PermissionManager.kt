@@ -22,4 +22,8 @@ interface PermissionManager {
 
     fun hasSmsAndContacts(): Boolean
 
+    fun hasSms(): Boolean
+
+    fun hasContacts(): Boolean
+
 }

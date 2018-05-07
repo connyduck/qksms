@@ -27,8 +27,12 @@ import javax.inject.Inject
 class PermissionManagerImpl @Inject constructor(private val context: Context) : PermissionManager {
 
     override fun hasSmsAndContacts(): Boolean {
-        return ContextCompat.checkSelfPermission(context, Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED
+        return hasSms() && hasContacts()
     }
+
+    override fun hasSms(): Boolean = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED
+
+    override fun hasContacts(): Boolean = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED
+
 
 }
