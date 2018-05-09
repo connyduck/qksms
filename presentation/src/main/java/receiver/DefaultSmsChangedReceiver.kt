@@ -38,10 +38,7 @@ class DefaultSmsChangedReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         appComponent.inject(this)
 
-        val isDefaultSmsApp = intent.getBooleanExtra(Telephony.Sms.Intents.EXTRA_IS_DEFAULT_SMS_APP, false)
-        prefs.defaultSms.set(isDefaultSmsApp)
-
-        if (isDefaultSmsApp) {
+        if (intent.getBooleanExtra(Telephony.Sms.Intents.EXTRA_IS_DEFAULT_SMS_APP, false)) {
             val pendingResult = goAsync()
             syncMessages.execute(Unit, { pendingResult.finish() })
         }

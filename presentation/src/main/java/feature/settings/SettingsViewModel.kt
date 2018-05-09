@@ -51,12 +51,6 @@ class SettingsViewModel : QkViewModel<SettingsView, SettingsState>(SettingsState
     init {
         appComponent.inject(this)
 
-        disposables += prefs.defaultSms
-                .asObservable()
-                .subscribe { isDefaultSmsApp ->
-                    newState { it.copy(isDefaultSmsApp = isDefaultSmsApp) }
-                }
-
         disposables += colors.theme
                 .subscribe { color -> newState { it.copy(theme = color) } }
 
@@ -120,8 +114,6 @@ class SettingsViewModel : QkViewModel<SettingsView, SettingsState>(SettingsState
                     Timber.v("Preference click: ${context.resources.getResourceName(it.id)}")
 
                     when (it.id) {
-                        R.id.defaultSms -> navigator.showDefaultSmsDialog()
-
                         R.id.theme -> navigator.showThemePicker()
 
                         R.id.night -> view.showNightModeDialog()
