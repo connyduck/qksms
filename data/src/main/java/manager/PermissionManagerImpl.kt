@@ -21,10 +21,15 @@ package manager
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.provider.Telephony
 import android.support.v4.content.ContextCompat
 import javax.inject.Inject
 
 class PermissionManagerImpl @Inject constructor(private val context: Context) : PermissionManager {
+
+    override fun isDefaultSms(): Boolean {
+        return Telephony.Sms.getDefaultSmsPackage(context) == context.packageName
+    }
 
     override fun hasSmsAndContacts(): Boolean {
         return hasSms() && hasContacts()

@@ -29,8 +29,6 @@
     <string name="title_compose">Type a name or number</string>
     <string name="title_qksms_plus">QKSMS+</string>
 
-    <string name="setup_title">Love texting again</string>
-    <string name="setup_summary">Make QKSMS your default SMS app</string>
     <string name="setup_skip">Skip</string>
     <string name="setup_next">Continue</string>
 
@@ -51,6 +49,13 @@
     <string name="archived_empty_text">Your archived conversations will appear here</string>
     <string name="scheduled_empty_text">Your scheduled messages will appear here</string>
     <string name="main_fab_cd">Start new conversation</string>
+    <string name="main_default_sms_title">Love texting again</string>
+    <string name="main_default_sms_message">Make QKSMS your default SMS app</string>
+    <string name="main_default_sms_change">Change</string>
+    <string name="main_permission_required">Permission required</string>
+    <string name="main_permission_sms">QKSMS needs permission to send and view SMS messages</string>
+    <string name="main_permission_contacts">QKSMS needs permission to view your contacts</string>
+    <string name="main_permission_allow">Allow</string>
 
     <string name="drawer_inbox">Inbox</string>
     <string name="drawer_archived">Archived</string>

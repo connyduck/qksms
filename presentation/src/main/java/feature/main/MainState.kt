@@ -26,8 +26,11 @@ data class MainState(
         val hasError: Boolean = false,
         val page: MainPage = Inbox(),
         val drawerOpen: Boolean = false,
+        val showRating: Boolean = false,
         val syncing: SyncRepository.SyncProgress = SyncRepository.SyncProgress.Idle(),
-        val showRating: Boolean = false
+        val defaultSms: Boolean = false,
+        val smsPermission: Boolean = false,
+        val contactPermission: Boolean = false
 )
 
 sealed class MainPage
