@@ -36,7 +36,6 @@ import model.Recipient
 import javax.inject.Inject
 
 class ConversationRecipientAdapter @Inject constructor(
-        private val context: Context,
         private val colors: Colors,
         private val navigator: Navigator
 ) : QkRealmAdapter<Recipient>() {
@@ -46,7 +45,7 @@ class ConversationRecipientAdapter @Inject constructor(
     private val disposables = CompositeDisposable()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): QkViewHolder {
-        val layoutInflater = LayoutInflater.from(context)
+        val layoutInflater = LayoutInflater.from(parent.context)
         val view = layoutInflater.inflate(R.layout.conversation_recipient_list_item, parent, false)
 
         disposables += colors.textSecondary

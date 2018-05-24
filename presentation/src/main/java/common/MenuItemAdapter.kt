@@ -65,7 +65,8 @@ class MenuItemAdapter @Inject constructor(private val context: Context, private 
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): QkViewHolder {
-        val view = LayoutInflater.from(context).inflate(R.layout.menu_list_item, parent, false)
+        val layoutInflater = LayoutInflater.from(parent.context)
+        val view = layoutInflater.inflate(R.layout.menu_list_item, parent, false)
 
         val states = arrayOf(
                 intArrayOf(android.R.attr.state_selected),

@@ -22,7 +22,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/ripple">
+    android:background="?attr/selectableItemBackground">
 
     <common.widget.QkTextView
         android:id="@+id/timestamp"
@@ -83,7 +83,7 @@
         android:layout_marginEnd="8dp"
         android:background="@drawable/circle"
         android:elevation="4dp"
-        android:foreground="@drawable/ripple"
+        android:foreground="?attr/selectableItemBackground"
         android:indeterminate="false"
         android:progressDrawable="@drawable/circular_progress_bar"
         app:layout_constraintBottom_toBottomOf="@id/body"

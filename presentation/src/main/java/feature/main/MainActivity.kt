@@ -45,6 +45,7 @@ import common.Navigator
 import common.base.QkThemedActivity
 import common.util.extensions.autoScrollToStart
 import common.util.extensions.dismissKeyboard
+import common.util.extensions.resolveThemeAttribute
 import common.util.extensions.setBackgroundTint
 import common.util.extensions.setTint
 import common.util.extensions.setVisible
@@ -138,7 +139,7 @@ class MainActivity : QkThemedActivity(), MainView {
         val rowBackground = { separator: Int ->
             StateListDrawable().apply {
                 addState(intArrayOf(android.R.attr.state_selected), ColorDrawable(separator))
-                addState(intArrayOf(-android.R.attr.state_selected), getDrawable(R.drawable.ripple))
+                addState(intArrayOf(-android.R.attr.state_selected), getDrawable(resolveThemeAttribute(R.attr.selectableItemBackground)))
                 mutate()
             }
         }

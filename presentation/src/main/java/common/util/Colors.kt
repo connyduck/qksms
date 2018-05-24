@@ -65,33 +65,6 @@ class Colors @Inject constructor(private val context: Context, private val prefs
 
     val theme = themeForConversation()
 
-    val appThemeResources = Observables.combineLatest(prefs.night.asObservable(), prefs.black.asObservable(),
-            { night, black ->
-                when {
-                    night && black -> R.style.AppThemeBlack
-                    night && !black -> R.style.AppThemeDark
-                    else -> R.style.AppThemeLight
-                }
-            })
-
-    val appDialogThemeResources = Observables.combineLatest(prefs.night.asObservable(), prefs.black.asObservable(),
-            { night, black ->
-                when {
-                    night && black -> R.style.AppThemeBlackDialog
-                    night && !black -> R.style.AppThemeDarkDialog
-                    else -> R.style.AppThemeLightDialog
-                }
-            })
-
-    val popupThemeResource = Observables.combineLatest(prefs.night.asObservable(), prefs.black.asObservable(),
-            { night, black ->
-                when {
-                    night && black -> R.style.PopupThemeBlack
-                    night && !black -> R.style.PopupThemeDark
-                    else -> R.style.PopupThemeLight
-                }
-            })
-
     /**
      * Returns the flags to be used for the system bars. This is used for tinting the icons
      * according to the colour of the system bars (light or dark)
@@ -157,15 +130,6 @@ class Colors @Inject constructor(private val context: Context, private val prefs
                 }
             })
             .map { res -> getColor(res) }
-            .distinctUntilChanged()
-
-    val ripple: Observable<Int> = prefs.night.asObservable()
-            .map { night ->
-                when (night) {
-                    true -> R.drawable.ripple_dark
-                    false -> R.drawable.ripple
-                }
-            }
             .distinctUntilChanged()
 
     val field: Observable<Int> = prefs.night.asObservable()

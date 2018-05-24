@@ -28,10 +28,12 @@ import com.uber.autodispose.android.lifecycle.scope
 import com.uber.autodispose.kotlin.autoDisposable
 import common.util.Colors
 import common.util.extensions.setBackgroundTint
+import io.reactivex.Observable
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.Subject
 import kotlinx.android.synthetic.main.toolbar.*
+import util.Preferences
 import javax.inject.Inject
 
 /**
@@ -43,6 +45,7 @@ import javax.inject.Inject
 abstract class QkThemedActivity : QkActivity() {
 
     @Inject lateinit var colors: Colors
+    @Inject lateinit var prefs: Preferences
 
     /**
      * In case the activity should be themed for a specific conversation, the selected conversation
@@ -59,11 +62,15 @@ abstract class QkThemedActivity : QkActivity() {
 
     @SuppressLint("InlinedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(getActivityThemeRes(prefs.night.get(), prefs.black.get()))
         super.onCreate(savedInstanceState)
 
-        getAppThemeResourcesObservable()
+        // When certain preferences change, we need to recreate the activity
+        Observable.merge(
+                listOf(prefs.night, prefs.black, prefs.textSize)
+                        .map { it.asObservable().skip(1) })
                 .autoDisposable(scope())
-                .subscribe { res -> setTheme(res) }
+                .subscribe { recreate() }
 
         colors.systemBarIcons
                 .autoDisposable(scope())
@@ -103,10 +110,6 @@ abstract class QkThemedActivity : QkActivity() {
                 .autoDisposable(scope(Lifecycle.Event.ON_DESTROY))
                 .subscribe()
 
-        colors.popupThemeResource
-                .autoDisposable(scope(Lifecycle.Event.ON_DESTROY))
-                .subscribe { res -> toolbar?.popupTheme = res }
-
         colors.toolbarColor
                 .doOnNext { color -> toolbar?.setBackgroundTint(color) }
                 .doOnNext { color ->
@@ -126,6 +129,10 @@ abstract class QkThemedActivity : QkActivity() {
     /**
      * This can be overridden in case an activity does not want to use the default themes
      */
-    open fun getAppThemeResourcesObservable() = colors.appThemeResources
+    open fun getActivityThemeRes(night: Boolean, black: Boolean) = when {
+        night && black -> R.style.AppThemeBlack
+        night && !black -> R.style.AppThemeDark
+        else -> R.style.AppThemeLight
+    }
 
 }

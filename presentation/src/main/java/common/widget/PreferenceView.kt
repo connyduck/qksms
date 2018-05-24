@@ -29,6 +29,7 @@ import com.uber.autodispose.android.scope
 import com.uber.autodispose.kotlin.autoDisposable
 import common.util.Colors
 import common.util.extensions.getColorCompat
+import common.util.extensions.resolveThemeAttribute
 import common.util.extensions.setTint
 import common.util.extensions.setVisible
 import injection.appComponent
@@ -72,7 +73,7 @@ class PreferenceView @JvmOverloads constructor(context: Context, attrs: Attribut
         }
 
         View.inflate(context, R.layout.preference_view, this)
-        setBackgroundResource(R.drawable.ripple)
+        setBackgroundResource(context.resolveThemeAttribute(R.attr.selectableItemBackground))
         orientation = HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL
 

@@ -42,8 +42,6 @@ import common.widget.QkTextView.Companion.SIZE_TERTIARY
 import common.widget.QkTextView.Companion.SIZE_TOOLBAR
 import injection.appComponent
 import io.reactivex.Observable
-import io.reactivex.rxkotlin.Observables
-import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
 import util.Preferences
@@ -84,8 +82,6 @@ class QkEditText @JvmOverloads constructor(context: Context, attrs: AttributeSet
     private var textColorObservable: Observable<Int>? = null
     private var textColorHintObservable: Observable<Int>? = null
 
-    private var textSizeAttrSubject: Subject<Int> = BehaviorSubject.create()
-
     init {
         if (!isInEditMode) {
             appComponent.inject(this)
@@ -125,8 +121,41 @@ class QkEditText @JvmOverloads constructor(context: Context, attrs: AttributeSet
      * @see SIZE_TERTIARY
      * @see SIZE_TOOLBAR
      */
-    fun setTextSize(size: Int) {
-        textSizeAttrSubject.onNext(size)
+    fun setTextSize(textSizeAttr: Int) {
+        val textSizePref = prefs.textSize.get()
+        when (textSizeAttr) {
+            SIZE_PRIMARY -> textSize = when (textSizePref) {
+                Preferences.TEXT_SIZE_SMALL -> 14f
+                Preferences.TEXT_SIZE_NORMAL -> 16f
+                Preferences.TEXT_SIZE_LARGE -> 18f
+                Preferences.TEXT_SIZE_LARGER -> 20f
+                else -> 16f
+            }
+
+            SIZE_SECONDARY -> textSize = when (textSizePref) {
+                Preferences.TEXT_SIZE_SMALL -> 12f
+                Preferences.TEXT_SIZE_NORMAL -> 14f
+                Preferences.TEXT_SIZE_LARGE -> 16f
+                Preferences.TEXT_SIZE_LARGER -> 18f
+                else -> 14f
+            }
+
+            SIZE_TERTIARY -> textSize = when (textSizePref) {
+                Preferences.TEXT_SIZE_SMALL -> 10f
+                Preferences.TEXT_SIZE_NORMAL -> 12f
+                Preferences.TEXT_SIZE_LARGE -> 14f
+                Preferences.TEXT_SIZE_LARGER -> 16f
+                else -> 12f
+            }
+
+            SIZE_TOOLBAR -> textSize = when (textSizePref) {
+                Preferences.TEXT_SIZE_SMALL -> 18f
+                Preferences.TEXT_SIZE_NORMAL -> 20f
+                Preferences.TEXT_SIZE_LARGE -> 22f
+                Preferences.TEXT_SIZE_LARGER -> 26f
+                else -> 20f
+            }
+        }
     }
 
     override fun onAttachedToWindow() {
@@ -144,45 +173,6 @@ class QkEditText @JvmOverloads constructor(context: Context, attrs: AttributeSet
         textColorHintObservable
                 ?.autoDisposable(scope())
                 ?.subscribe { color -> setHintTextColor(color) }
-
-        Observables
-                .combineLatest(prefs.textSize.asObservable(), textSizeAttrSubject, { textSizePref, textSizeAttr ->
-                    when (textSizeAttr) {
-                        SIZE_PRIMARY -> textSize = when (textSizePref) {
-                            Preferences.TEXT_SIZE_SMALL -> 14f
-                            Preferences.TEXT_SIZE_NORMAL -> 16f
-                            Preferences.TEXT_SIZE_LARGE -> 18f
-                            Preferences.TEXT_SIZE_LARGER -> 20f
-                            else -> 16f
-                        }
-
-                        SIZE_SECONDARY -> textSize = when (textSizePref) {
-                            Preferences.TEXT_SIZE_SMALL -> 12f
-                            Preferences.TEXT_SIZE_NORMAL -> 14f
-                            Preferences.TEXT_SIZE_LARGE -> 16f
-                            Preferences.TEXT_SIZE_LARGER -> 18f
-                            else -> 14f
-                        }
-
-                        SIZE_TERTIARY -> textSize = when (textSizePref) {
-                            Preferences.TEXT_SIZE_SMALL -> 10f
-                            Preferences.TEXT_SIZE_NORMAL -> 12f
-                            Preferences.TEXT_SIZE_LARGE -> 14f
-                            Preferences.TEXT_SIZE_LARGER -> 16f
-                            else -> 12f
-                        }
-
-                        SIZE_TOOLBAR -> textSize = when (textSizePref) {
-                            Preferences.TEXT_SIZE_SMALL -> 18f
-                            Preferences.TEXT_SIZE_NORMAL -> 20f
-                            Preferences.TEXT_SIZE_LARGE -> 22f
-                            Preferences.TEXT_SIZE_LARGER -> 26f
-                            else -> 20f
-                        }
-                    }
-                })
-                .autoDisposable(scope())
-                .subscribe()
     }
 
     override fun onCreateInputConnection(editorInfo: EditorInfo): InputConnection {

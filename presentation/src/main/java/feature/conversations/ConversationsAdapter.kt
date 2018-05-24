@@ -20,7 +20,6 @@ package feature.conversations
 
 import android.content.Context
 import android.graphics.Typeface
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.jakewharton.rxbinding2.view.clicks
@@ -31,8 +30,6 @@ import common.base.QkRealmAdapter
 import common.base.QkViewHolder
 import common.util.Colors
 import common.util.DateFormatter
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.conversation_list_item.view.*
 import model.Conversation
 import javax.inject.Inject
@@ -44,18 +41,13 @@ class ConversationsAdapter @Inject constructor(
         private val navigator: Navigator
 ) : QkRealmAdapter<Conversation>() {
 
-    private val disposables = CompositeDisposable()
-
     init {
         setHasStableIds(true)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): QkViewHolder {
-        val layoutInflater = LayoutInflater.from(context)
+        val layoutInflater = LayoutInflater.from(parent.context)
         val view = layoutInflater.inflate(R.layout.conversation_list_item, parent, false)
-
-        disposables += colors.ripple
-                .subscribe { res -> view.setBackgroundResource(res) }
 
         if (viewType == 1) {
             view.title.setTypeface(view.title.typeface, Typeface.BOLD)
@@ -95,11 +87,6 @@ class ConversationsAdapter @Inject constructor(
             true -> context.getString(R.string.main_sender_you, conversation.snippet)
             false -> conversation.snippet
         }
-    }
-
-    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-        super.onDetachedFromRecyclerView(recyclerView)
-        disposables.clear()
     }
 
     override fun getItemId(index: Int): Long {

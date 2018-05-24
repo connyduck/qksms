@@ -43,13 +43,11 @@ import io.reactivex.rxkotlin.Observables
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
 import kotlinx.android.synthetic.main.qkreply_activity.*
-import util.Preferences
 import javax.inject.Inject
 
 class QkReplyActivity : QkThemedActivity(), QkReplyView {
 
     @Inject lateinit var adapter: MessagesAdapter
-    @Inject lateinit var prefs: Preferences
     @Inject lateinit var viewModelFactory: ViewModelProvider.Factory
 
     override val menuItemIntent: Subject<Int> = PublishSubject.create()
@@ -145,6 +143,10 @@ class QkReplyActivity : QkThemedActivity(), QkReplyView {
         return true
     }
 
-    override fun getAppThemeResourcesObservable() = colors.appDialogThemeResources
+    override fun getActivityThemeRes(night: Boolean, black: Boolean) = when {
+        night && black -> R.style.AppThemeBlackDialog
+        night && !black -> R.style.AppThemeDarkDialog
+        else -> R.style.AppThemeLightDialog
+    }
 
 }

@@ -153,9 +153,6 @@ class MessagesAdapter @Inject constructor(
                     .subscribe { color -> view.body.setBackgroundTint(color) }
         }
 
-        disposables += colors.ripple
-                .subscribe { res -> view.setBackgroundResource(res) }
-
         view.body.forwardTouches(view)
 
         return QkViewHolder(view)

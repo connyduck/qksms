@@ -24,7 +24,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@drawable/ripple"
+    android:background="?attr/selectableItemBackground"
     android:gravity="center_vertical|start"
     android:orientation="horizontal"
     android:paddingBottom="12dp"
