@@ -43,13 +43,13 @@ import common.util.DateFormatter
 import common.util.GlideApp
 import common.util.extensions.dpToPx
 import common.util.extensions.forwardTouches
+import common.util.extensions.resolveThemeColor
 import common.util.extensions.setBackgroundTint
 import common.util.extensions.setPadding
 import common.util.extensions.setTint
 import common.util.extensions.setVisible
 import common.widget.BubbleImageView.Style.*
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
 import io.realm.RealmResults
@@ -91,8 +91,8 @@ class MessagesAdapter @Inject constructor(
 
             // Update the theme
             val threadId = value?.first?.id ?: 0
-            theme = colors.themeForConversation(threadId)
-            textPrimaryOnTheme = colors.textPrimaryOnThemeForConversation(threadId)
+            theme = colors.theme(threadId)
+            textPrimaryOnTheme = colors.textPrimaryOnTheme(threadId)
 
             updateData(value?.second)
         }
@@ -119,8 +119,8 @@ class MessagesAdapter @Inject constructor(
     private val expanded = HashMap<Long, Boolean>()
     private val disposables = CompositeDisposable()
 
-    private var theme = colors.theme
-    private var textPrimaryOnTheme = colors.textPrimaryOnTheme
+    private var theme = colors.theme()
+    private var textPrimaryOnTheme = colors.textPrimaryOnTheme()
 
     /**
      * If the viewType is negative, then the viewHolder has an attachment. We'll consider
@@ -135,22 +135,13 @@ class MessagesAdapter @Inject constructor(
 
         if (viewType == VIEW_TYPE_MESSAGE_OUT) {
             view = layoutInflater.inflate(R.layout.message_list_item_out, parent, false)
-            disposables += colors.bubble
-                    .subscribe { color ->
-                        view.body.setBackgroundTint(color)
-                        view.findViewById<ProgressBar>(R.id.cancel).setBackgroundTint(color)
-                    }
-            disposables += theme
-                    .subscribe { color ->
-                        view.findViewById<ImageView>(R.id.cancelIcon).setTint(color)
-                        view.findViewById<ProgressBar>(R.id.cancel).setTint(color)
-                    }
+            view.findViewById<ImageView>(R.id.cancelIcon).setTint(theme)
+            view.findViewById<ProgressBar>(R.id.cancel).setTint(theme)
         } else {
             view = layoutInflater.inflate(R.layout.message_list_item_in, parent, false)
             view.avatar.threadId = conversation?.id ?: 0
-            view.body.textColorObservable = textPrimaryOnTheme
-            disposables += theme
-                    .subscribe { color -> view.body.setBackgroundTint(color) }
+            view.body.setTextColor(textPrimaryOnTheme)
+            view.body.setBackgroundTint(theme)
         }
 
         view.body.forwardTouches(view)
@@ -300,9 +291,9 @@ class MessagesAdapter @Inject constructor(
         // If we're on API 21, we need to re-tint the background
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP_MR1) {
             view.body.setBackgroundTint(when (message.isMe()) {
-                true -> colors.bubble
+                true -> context.resolveThemeColor(R.attr.bubbleColor)
                 false -> theme
-            }.blockingFirst())
+            })
         }
     }
 

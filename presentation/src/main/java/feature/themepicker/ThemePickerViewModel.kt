@@ -63,7 +63,7 @@ class ThemePickerViewModel @Inject constructor(
         // Update the color of the apply button
         view.hsvThemeSelectedIntent
                 .doOnNext { color -> newState { it.copy(newColor = color) } }
-                .switchMap { color -> colors.textPrimaryOnThemeForColor(color) }
+                .map { color -> colors.textPrimaryOnThemeForColor(color) }
                 .doOnNext { color -> newState { it.copy(newTextColor = color) } }
                 .autoDisposable(view.scope())
                 .subscribe()

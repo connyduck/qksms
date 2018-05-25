@@ -67,17 +67,6 @@ class QkReplyActivity : QkThemedActivity(), QkReplyView {
         window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         viewModel.bindView(this)
 
-        colors.composeBackground
-                .doOnNext  { color -> background.setBackgroundTint(color) }
-                .doOnNext  { color -> composeBackground.setBackgroundTint(color) }
-                .doOnNext  { color -> composeBackgroundGradient.setBackgroundTint(color) }
-                .autoDisposable(scope())
-                .subscribe()
-
-        colors.bubble
-                .autoDisposable(scope())
-                .subscribe { color -> message.setBackgroundTint(color) }
-
         theme
                 .autoDisposable(scope())
                 .subscribe { color -> send.setBackgroundTint(color) }
@@ -88,11 +77,11 @@ class QkReplyActivity : QkThemedActivity(), QkReplyView {
 
         val iconEnabled = threadId
                 .distinctUntilChanged()
-                .switchMap { threadId -> colors.textPrimaryOnThemeForConversation(threadId) }
+                .map { threadId -> colors.textPrimaryOnTheme(threadId) }
 
         val iconDisabled = threadId
                 .distinctUntilChanged()
-                .switchMap { threadId -> colors.textTertiaryOnThemeForConversation(threadId) }
+                .map { threadId -> colors.textTertiaryOnTheme(threadId) }
 
         Observables
                 .combineLatest(iconEnabled, iconDisabled, { primary, tertiary ->

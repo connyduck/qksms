@@ -25,10 +25,7 @@ import android.telephony.PhoneNumberUtils
 import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
-import com.jakewharton.rxbinding2.view.clicks
 import com.moez.QKSMS.R
-import com.uber.autodispose.android.scope
-import com.uber.autodispose.kotlin.autoDisposable
 import common.Navigator
 import common.util.Colors
 import common.util.GlideApp
@@ -63,6 +60,16 @@ class AvatarView @JvmOverloads constructor(context: Context, attrs: AttributeSet
 
         setBackgroundResource(R.drawable.circle)
         clipToOutline = true
+
+        setOnClickListener {
+            if (lookupKey.isNullOrEmpty()) {
+                address?.let { address -> navigator.addContact(address) }
+            } else {
+                val uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, lookupKey)
+                ContactsContract.QuickContact.showQuickContact(context, this@AvatarView, uri,
+                        ContactsContract.QuickContact.MODE_MEDIUM, null)
+            }
+        }
     }
 
     fun setContact(recipient: Recipient?) {
@@ -89,26 +96,11 @@ class AvatarView @JvmOverloads constructor(context: Context, attrs: AttributeSet
         super.onAttachedToWindow()
 
         if (!isInEditMode) {
-            colors.themeForConversation(threadId)
-                    .autoDisposable(scope())
-                    .subscribe { color -> setBackgroundTint(color) }
+            setBackgroundTint(colors.theme(threadId))
 
-            colors.textPrimaryOnThemeForConversation(threadId)
-                    .apply { initial.textColorObservable = this }
-                    .autoDisposable(scope())
-                    .subscribe { color -> icon.setTint(color) }
-
-            clicks()
-                    .autoDisposable(scope())
-                    .subscribe {
-                        if (lookupKey.isNullOrEmpty()) {
-                            address?.let { address -> navigator.addContact(address) }
-                        } else {
-                            val uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, lookupKey)
-                            ContactsContract.QuickContact.showQuickContact(context, this@AvatarView, uri,
-                                    ContactsContract.QuickContact.MODE_MEDIUM, null)
-                        }
-                    }
+            val initialColor = colors.textPrimaryOnTheme(threadId)
+            initial.setTextColor(initialColor)
+            icon.setTint(initialColor)
         }
     }
 

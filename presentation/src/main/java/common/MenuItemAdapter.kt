@@ -29,10 +29,9 @@ import com.moez.QKSMS.R
 import common.base.QkAdapter
 import common.base.QkViewHolder
 import common.util.Colors
+import common.util.extensions.resolveThemeColor
 import common.util.extensions.setVisible
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.Observables
-import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
 import kotlinx.android.synthetic.main.menu_list_item.view.*
@@ -72,11 +71,8 @@ class MenuItemAdapter @Inject constructor(private val context: Context, private 
                 intArrayOf(android.R.attr.state_selected),
                 intArrayOf(-android.R.attr.state_selected))
 
-        disposables += Observables
-                .combineLatest(colors.theme, colors.textTertiary, { theme, textSecondary ->
-                    ColorStateList(states, intArrayOf(theme, textSecondary))
-                })
-                .subscribe { view.check.imageTintList = it }
+        val text = parent.context.resolveThemeColor(android.R.attr.textColorTertiary)
+        view.check.imageTintList = ColorStateList(states, intArrayOf(colors.theme(), text))
 
         return QkViewHolder(view)
     }

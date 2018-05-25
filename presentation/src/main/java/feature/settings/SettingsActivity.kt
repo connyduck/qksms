@@ -87,10 +87,6 @@ class SettingsActivity : QkThemedActivity(), SettingsView {
 
         about.summary = getString(R.string.settings_version, BuildConfig.VERSION_NAME)
 
-        colors.background
-                .autoDisposable(scope())
-                .subscribe { color -> window.decorView.setBackgroundColor(color) }
-
         // Listen to clicks for all of the preferences
         (0 until preferences.childCount)
                 .map { index -> preferences.getChildAt(index) }

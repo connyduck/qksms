@@ -59,10 +59,6 @@ class ConversationInfoActivity : QkThemedActivity(), ConversationInfoView {
         viewModel.bindView(this)
         setTitle(R.string.info_title)
 
-        colors.background
-                .autoDisposable(scope())
-                .subscribe { color -> window.decorView.setBackgroundColor(color) }
-
         mediaAdapter.thumbnailClicks
                 .autoDisposable(scope())
                 .subscribe { view -> navigator.showImageAnimated(this, view) }

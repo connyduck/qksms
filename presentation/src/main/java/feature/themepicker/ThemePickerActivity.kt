@@ -25,11 +25,8 @@ import android.support.design.widget.Snackbar
 import android.support.v7.widget.LinearLayoutManager
 import com.jakewharton.rxbinding2.view.clicks
 import com.moez.QKSMS.R
-import com.uber.autodispose.android.lifecycle.scope
-import com.uber.autodispose.kotlin.autoDisposable
 import common.base.QkThemedActivity
 import common.util.extensions.setBackgroundTint
-import common.util.extensions.setTint
 import common.util.extensions.setVisible
 import dagger.android.AndroidInjection
 import io.reactivex.subjects.PublishSubject
@@ -68,14 +65,6 @@ class ThemePickerActivity : QkThemedActivity(), ThemePickerView {
 
         materialColors.layoutManager = LinearLayoutManager(this)
         materialColors.adapter = themeAdapter
-
-        colors.background
-                .autoDisposable(scope())
-                .subscribe { color -> window.decorView.setBackgroundColor(color) }
-
-        colors.textSecondary
-                .autoDisposable(scope())
-                .subscribe { color -> clear.setTint(color) }
     }
 
     override fun showQksmsPlusSnackbar() {

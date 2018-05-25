@@ -40,6 +40,13 @@ fun Context.resolveThemeAttribute(attributeId: Int, default: Int = 0): Int {
     return if (wasResolved) outValue.resourceId else default
 }
 
+fun Context.resolveThemeColor(attributeId: Int, default: Int = 0): Int {
+    val outValue = TypedValue()
+    val wasResolved = theme.resolveAttribute(attributeId, outValue, true)
+
+    return if (wasResolved) getColorCompat(outValue.resourceId) else default
+}
+
 fun Context.makeToast(@StringRes res: Int, duration: Int = Toast.LENGTH_SHORT) {
     Toast.makeText(this, res, duration).show()
 }

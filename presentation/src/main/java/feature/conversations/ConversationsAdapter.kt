@@ -22,21 +22,18 @@ import android.content.Context
 import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import com.jakewharton.rxbinding2.view.clicks
-import com.jakewharton.rxbinding2.view.longClicks
 import com.moez.QKSMS.R
 import common.Navigator
 import common.base.QkRealmAdapter
 import common.base.QkViewHolder
-import common.util.Colors
 import common.util.DateFormatter
+import common.util.extensions.resolveThemeColor
 import kotlinx.android.synthetic.main.conversation_list_item.view.*
 import model.Conversation
 import javax.inject.Inject
 
 class ConversationsAdapter @Inject constructor(
         private val context: Context,
-        private val colors: Colors,
         private val dateFormatter: DateFormatter,
         private val navigator: Navigator
 ) : QkRealmAdapter<Conversation>() {
@@ -50,14 +47,16 @@ class ConversationsAdapter @Inject constructor(
         val view = layoutInflater.inflate(R.layout.conversation_list_item, parent, false)
 
         if (viewType == 1) {
+            val textColorPrimary = parent.context.resolveThemeColor(android.R.attr.textColorPrimary)
+
             view.title.setTypeface(view.title.typeface, Typeface.BOLD)
 
             view.snippet.setTypeface(view.snippet.typeface, Typeface.BOLD)
-            view.snippet.textColorObservable = colors.textPrimary
+            view.snippet.setTextColor(textColorPrimary)
             view.snippet.maxLines = 5
 
             view.date.setTypeface(view.date.typeface, Typeface.BOLD)
-            view.date.textColorObservable = colors.textPrimary
+            view.date.setTextColor(textColorPrimary)
         }
 
         return QkViewHolder(view)
@@ -67,15 +66,16 @@ class ConversationsAdapter @Inject constructor(
         val conversation = getItem(position)!!
         val view = viewHolder.itemView
 
-        view.clicks().subscribe {
+        view.setOnClickListener {
             when (toggleSelection(conversation.id, false)) {
                 true -> view.isSelected = isSelected(conversation.id)
                 false -> navigator.showConversation(conversation.id)
             }
         }
-        view.longClicks().subscribe {
+        view.setOnLongClickListener {
             toggleSelection(conversation.id)
             view.isSelected = isSelected(conversation.id)
+            true
         }
 
         view.isSelected = isSelected(conversation.id)

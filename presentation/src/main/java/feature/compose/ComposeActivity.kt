@@ -42,7 +42,6 @@ import com.uber.autodispose.kotlin.autoDisposable
 import common.base.QkThemedActivity
 import common.util.extensions.autoScrollToStart
 import common.util.extensions.setBackgroundTint
-import common.util.extensions.setTint
 import common.util.extensions.setVisible
 import common.util.extensions.showKeyboard
 import dagger.android.AndroidInjection
@@ -129,11 +128,11 @@ class ComposeActivity : QkThemedActivity(), ComposeView {
 
         val iconEnabled = threadId
                 .distinctUntilChanged()
-                .switchMap { threadId -> colors.textPrimaryOnThemeForConversation(threadId) }
+                .map { threadId -> colors.textPrimaryOnTheme(threadId) }
 
         val iconDisabled = threadId
                 .distinctUntilChanged()
-                .switchMap { threadId -> colors.textTertiaryOnThemeForConversation(threadId) }
+                .map { threadId -> colors.textTertiaryOnTheme(threadId) }
 
         Observables
                 .combineLatest(iconEnabled, iconDisabled, { primary, tertiary ->
@@ -145,28 +144,6 @@ class ComposeActivity : QkThemedActivity(), ComposeView {
         theme
                 .autoDisposable(scope())
                 .subscribe { color -> send.setBackgroundTint(color) }
-
-        colors.textSecondary
-                .autoDisposable(scope())
-                .subscribe { color ->
-                    attach.setTint(color)
-                    camera.setTint(color)
-                    gallery.setTint(color)
-                }
-
-        colors.bubble
-                .autoDisposable(scope())
-                .subscribe { color -> messageBackground.setBackgroundTint(color) }
-
-        colors.background
-                .autoDisposable(scope())
-                .subscribe { color -> contacts.setBackgroundColor(color) }
-
-        colors.composeBackground
-                .doOnNext { color -> composeBackground.setBackgroundTint(color) }
-                .doOnNext { color -> window.decorView.setBackgroundColor(color) }
-                .autoDisposable(scope())
-                .subscribe()
 
         window.callback = ComposeWindowCallback(window.callback, this)
     }

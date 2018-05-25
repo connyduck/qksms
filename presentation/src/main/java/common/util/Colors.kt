@@ -18,15 +18,11 @@
  */
 package common.util
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
-import android.os.Build
-import android.support.annotation.ColorRes
-import android.view.View
 import com.moez.QKSMS.R
+import common.util.extensions.getColorCompat
 import io.reactivex.Observable
-import io.reactivex.rxkotlin.Observables
 import util.Preferences
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -59,191 +55,48 @@ class Colors @Inject constructor(private val context: Context, private val prefs
     private val minimumContrastRatio = 2
 
     // Cache these values so they don't need to be recalculated
-    private val primaryTextLuminance = measureLuminance(getColor(R.color.textPrimaryDark))
-    private val secondaryTextLuminance = measureLuminance(getColor(R.color.textSecondaryDark))
-    private val tertiaryTextLuminance = measureLuminance(getColor(R.color.textTertiaryDark))
+    private val primaryTextLuminance = measureLuminance(context.getColorCompat(R.color.textPrimaryDark))
+    private val secondaryTextLuminance = measureLuminance(context.getColorCompat(R.color.textSecondaryDark))
+    private val tertiaryTextLuminance = measureLuminance(context.getColorCompat(R.color.textTertiaryDark))
 
-    val theme = themeForConversation()
+    val highlightColor: Int = theme()
+            .let { theme -> FloatArray(3).apply { Color.colorToHSV(theme, this) } }
+            .let { hsv -> hsv.apply { set(2, 0.75f) } } // 75% value
+            .let { hsv -> Color.HSVToColor(85, hsv) } // 33% alpha
 
-    /**
-     * Returns the flags to be used for the system bars. This is used for tinting the icons
-     * according to the colour of the system bars (light or dark)
-     *
-     * If night mode, or no dark icons supported, use light icons
-     *
-     * If night mode and only dark status icons supported, use dark status icons
-     *
-     * If night mode and all dark icons supported, use all dark icons
-     */
-    @SuppressLint("InlinedApi")
-    val systemBarIcons: Observable<Int> = prefs.night.asObservable()
-            .map { night ->
-                when {
-                    night || Build.VERSION.SDK_INT < Build.VERSION_CODES.M -> 0
-                    Build.VERSION.SDK_INT < Build.VERSION_CODES.O -> View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                    else -> View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-                }
-            }
-            .distinctUntilChanged()
+    fun theme(threadId: Long = 0): Int = prefs.theme(threadId).get()
 
-    val statusBar: Observable<Int> = Observables.combineLatest(prefs.night.asObservable(), prefs.black.asObservable(),
-            { night, black ->
-                when {
-                    night && black -> R.color.black
-                    night && !black -> R.color.statusBarDark
-                    Build.VERSION.SDK_INT < Build.VERSION_CODES.M -> R.color.black
-                    else -> R.color.statusBarLight
-                }
-            })
-            .map { res -> getColor(res) }
-            .distinctUntilChanged()
+    fun themeObservable(threadId: Long = 0): Observable<Int> = prefs.theme(threadId).asObservable()
 
-    val navigationBar: Observable<Int> = Observables.combineLatest(prefs.night.asObservable(), prefs.black.asObservable(),
-            { night, black ->
-                when {
-                    night && black -> R.color.black
-                    night && !black -> R.color.backgroundDark
-                    Build.VERSION.SDK_INT < Build.VERSION_CODES.O -> R.color.black
-                    else -> R.color.white
-                }
-            })
-            .map { res -> getColor(res) }
-            .distinctUntilChanged()
+    fun textPrimaryOnTheme(threadId: Long = 0): Int = theme(threadId)
+            .let { color -> textPrimaryOnThemeForColor(color) }
 
-    val toolbarColor: Observable<Int> = Observables.combineLatest(prefs.night.asObservable(), prefs.black.asObservable(),
-            { night, black ->
-                when {
-                    night && black -> R.color.black
-                    night && !black -> R.color.toolbarDark
-                    else -> R.color.toolbarLight
-                }
-            })
-            .map { res -> getColor(res) }
-            .distinctUntilChanged()
+    fun textPrimaryOnThemeForColor(color: Int): Int = color
+            .let { theme -> measureLuminance(theme) }
+            .let { themeLuminance -> primaryTextLuminance / themeLuminance }
+            .let { contrastRatio -> contrastRatio < minimumContrastRatio }
+            .let { contrastRatio -> if (contrastRatio) R.color.textPrimary else R.color.textPrimaryDark }
+            .let { res -> context.getColorCompat(res) }
 
-    val background: Observable<Int> = Observables.combineLatest(prefs.night.asObservable(), prefs.black.asObservable(),
-            { night, black ->
-                when {
-                    night && black -> R.color.black
-                    night && !black -> R.color.backgroundDark
-                    else -> R.color.white
-                }
-            })
-            .map { res -> getColor(res) }
-            .distinctUntilChanged()
+    fun textSecondaryOnTheme(threadId: Long = 0): Int = theme(threadId)
+            .let { color -> textSecondaryOnThemeForColor(color) }
 
-    val field: Observable<Int> = prefs.night.asObservable()
-            .map { night -> if (night) R.color.fieldDark else R.color.fieldLight }
-            .map { res -> getColor(res) }
-            .distinctUntilChanged()
+    fun textSecondaryOnThemeForColor(color: Int): Int = color
+            .let { theme -> measureLuminance(theme) }
+            .let { themeLuminance -> secondaryTextLuminance / themeLuminance }
+            .let { contrastRatio -> contrastRatio < minimumContrastRatio }
+            .let { contrastRatio -> if (contrastRatio) R.color.textSecondary else R.color.textSecondaryDark }
+            .let { res -> context.getColorCompat(res) }
 
-    val composeBackground: Observable<Int> = Observables.combineLatest(prefs.night.asObservable(), prefs.black.asObservable(),
-            { night, black ->
-                when {
-                    night && black -> R.color.black
-                    night && !black -> R.color.backgroundDark
-                    else -> R.color.backgroundLight
-                }
-            })
-            .map { res -> getColor(res) }
-            .distinctUntilChanged()
+    fun textTertiaryOnTheme(threadId: Long = 0): Int = theme(threadId)
+            .let { color -> textTertiaryOnThemeForColor(color) }
 
-    val separator: Observable<Int> = prefs.night.asObservable()
-            .map { night -> if (night) R.color.separatorDark else R.color.separatorLight }
-            .map { res -> getColor(res) }
-            .distinctUntilChanged()
-
-    val textPrimary: Observable<Int> = prefs.night.asObservable()
-            .map { night -> if (night) R.color.textPrimaryDark else R.color.textPrimary }
-            .map { res -> getColor(res) }
-            .distinctUntilChanged()
-
-    val textSecondary: Observable<Int> = prefs.night.asObservable()
-            .map { night -> if (night) R.color.textSecondaryDark else R.color.textSecondary }
-            .map { res -> getColor(res) }
-            .distinctUntilChanged()
-
-    val textTertiary: Observable<Int> = prefs.night.asObservable()
-            .map { night -> if (night) R.color.textTertiaryDark else R.color.textTertiary }
-            .map { res -> getColor(res) }
-            .distinctUntilChanged()
-
-    val highlightColor: Observable<Int> = theme
-            .map { theme -> FloatArray(3).apply { Color.colorToHSV(theme, this) } }
-            .map { hsv -> hsv.apply { set(2, 0.75f) } } // 75% value
-            .map { hsv -> Color.HSVToColor(85, hsv) } // 33% alpha
-
-    val textPrimaryOnTheme = textPrimaryOnThemeForConversation()
-
-    val textSecondaryOnTheme = textSecondaryOnThemeForConversation()
-
-    val textTertiaryOnTheme = textTertiaryOnThemeForConversation()
-
-    val bubble: Observable<Int> = prefs.night.asObservable()
-            .map { night -> if (night) R.color.bubbleDark else R.color.bubbleLight }
-            .map { res -> getColor(res) }
-            .distinctUntilChanged()
-
-    val switchThumbEnabled: Observable<Int> = prefs.night.asObservable()
-            .map { night -> if (night) R.color.switchThumbEnabledDark else R.color.switchThumbEnabledLight }
-            .map { res -> getColor(res) }
-            .distinctUntilChanged()
-
-    val switchThumbDisabled: Observable<Int> = prefs.night.asObservable()
-            .map { night -> if (night) R.color.switchThumbDisabledDark else R.color.switchThumbDisabledLight }
-            .map { res -> getColor(res) }
-            .distinctUntilChanged()
-
-    val switchTrackEnabled: Observable<Int> = prefs.night.asObservable()
-            .map { night -> if (night) R.color.switchTrackEnabledDark else R.color.switchTrackEnabledLight }
-            .map { res -> getColor(res) }
-            .distinctUntilChanged()
-
-    val switchTrackDisabled: Observable<Int> = prefs.night.asObservable()
-            .map { night -> if (night) R.color.switchTrackDisabledDark else R.color.switchTrackDisabledLight }
-            .map { res -> getColor(res) }
-            .distinctUntilChanged()
-
-    fun themeForConversation(threadId: Long = 0): Observable<Int> = prefs.theme(threadId)
-            .asObservable()
-            .distinctUntilChanged()
-
-    fun textPrimaryOnThemeForConversation(threadId: Long = 0): Observable<Int> = themeForConversation(threadId)
-            .switchMap { color -> textPrimaryOnThemeForColor(color) }
-
-    fun textPrimaryOnThemeForColor(color: Int): Observable<Int> = Observable.just(color)
-            .map { theme -> measureLuminance(theme) }
-            .map { themeLuminance -> primaryTextLuminance / themeLuminance }
-            .map { contrastRatio -> contrastRatio < minimumContrastRatio }
-            .map { contrastRatio -> if (contrastRatio) R.color.textPrimary else R.color.textPrimaryDark }
-            .map { res -> getColor(res) }
-            .distinctUntilChanged()
-
-    fun textSecondaryOnThemeForConversation(threadId: Long = 0): Observable<Int> = themeForConversation(threadId)
-            .switchMap { color -> textSecondaryOnThemeForColor(color) }
-
-    fun textSecondaryOnThemeForColor(color: Int): Observable<Int> = Observable.just(color)
-            .map { theme -> measureLuminance(theme) }
-            .map { themeLuminance -> secondaryTextLuminance / themeLuminance }
-            .map { contrastRatio -> contrastRatio < minimumContrastRatio }
-            .map { contrastRatio -> if (contrastRatio) R.color.textSecondary else R.color.textSecondaryDark }
-            .map { res -> getColor(res) }
-            .distinctUntilChanged()
-
-    fun textTertiaryOnThemeForConversation(threadId: Long = 0): Observable<Int> = themeForConversation(threadId)
-            .switchMap { color -> textTertiaryOnThemeForColor(color) }
-
-    fun textTertiaryOnThemeForColor(color: Int): Observable<Int> = Observable.just(color)
-            .map { theme -> measureLuminance(theme) }
-            .map { themeLuminance -> tertiaryTextLuminance / themeLuminance }
-            .map { contrastRatio -> contrastRatio < minimumContrastRatio }
-            .map { contrastRatio -> if (contrastRatio) R.color.textTertiary else R.color.textTertiaryDark }
-            .map { res -> getColor(res) }
-            .distinctUntilChanged()
-
-    private fun getColor(@ColorRes res: Int): Int {
-        return context.resources.getColor(res)
-    }
+    fun textTertiaryOnThemeForColor(color: Int): Int = color
+            .let { theme -> measureLuminance(theme) }
+            .let { themeLuminance -> tertiaryTextLuminance / themeLuminance }
+            .let { contrastRatio -> contrastRatio < minimumContrastRatio }
+            .let { contrastRatio -> if (contrastRatio) R.color.textTertiary else R.color.textTertiaryDark }
+            .let { res -> context.getColorCompat(res) }
 
     /**
      * Measures the luminance value of a color to be able to measure the contrast ratio between two materialColors

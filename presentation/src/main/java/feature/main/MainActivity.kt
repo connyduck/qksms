@@ -39,13 +39,12 @@ import com.jakewharton.rxbinding2.support.v4.widget.drawerOpen
 import com.jakewharton.rxbinding2.view.clicks
 import com.jakewharton.rxbinding2.widget.textChanges
 import com.moez.QKSMS.R
-import com.uber.autodispose.android.lifecycle.scope
-import com.uber.autodispose.kotlin.autoDisposable
 import common.Navigator
 import common.base.QkThemedActivity
 import common.util.extensions.autoScrollToStart
 import common.util.extensions.dismissKeyboard
 import common.util.extensions.resolveThemeAttribute
+import common.util.extensions.resolveThemeColor
 import common.util.extensions.setBackgroundTint
 import common.util.extensions.setTint
 import common.util.extensions.setVisible
@@ -53,7 +52,6 @@ import dagger.android.AndroidInjection
 import feature.conversations.ConversationItemTouchCallback
 import feature.conversations.ConversationsAdapter
 import io.reactivex.Observable
-import io.reactivex.rxkotlin.Observables
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
 import kotlinx.android.synthetic.main.drawer_view.*
@@ -126,12 +124,6 @@ class MainActivity : QkThemedActivity(), MainView {
 
         scheduled.isEnabled = false
 
-        colors.background
-                .doOnNext { color -> window.decorView.setBackgroundColor(color) }
-                .doOnNext { color -> drawer.setBackgroundColor(color) }
-                .autoDisposable(scope())
-                .subscribe()
-
         val states = arrayOf(
                 intArrayOf(android.R.attr.state_selected),
                 intArrayOf(-android.R.attr.state_selected))
@@ -145,48 +137,40 @@ class MainActivity : QkThemedActivity(), MainView {
         }
 
         // Set the theme color tint to the progressbar and FAB
-        colors.theme
-                .doOnNext { color -> syncingProgress.indeterminateTintList = ColorStateList.valueOf(color) }
-                .doOnNext { color -> itemTouchCallback.color = color }
-                .doOnNext { color -> rateIcon.setTint(color) }
-                .doOnNext { color -> compose.setBackgroundTint(color) }
-                .autoDisposable(scope())
-                .subscribe()
+        colors.theme().let { theme ->
+            syncingProgress.indeterminateTintList = ColorStateList.valueOf(theme)
+            itemTouchCallback.color = theme
+            rateIcon.setTint(theme)
+            compose.setBackgroundTint(theme)
+        }
 
         // Set the FAB compose icon color
-        colors.textPrimaryOnTheme
-                .doOnNext { color -> compose.setTint(color) }
-                .doOnNext { color -> itemTouchCallback.iconColor = color }
-                .autoDisposable(scope())
-                .subscribe()
+        colors.textPrimaryOnTheme().let { textPrimaryOnTheme ->
+            compose.setTint(textPrimaryOnTheme)
+            itemTouchCallback.iconColor = textPrimaryOnTheme
+        }
 
         // Set the hamburger icon color
-        colors.textSecondary
-                .autoDisposable(scope())
-                .subscribe { color -> toggle.drawerArrowDrawable.color = color }
+        toggle.drawerArrowDrawable.color = resolveThemeColor(android.R.attr.textColorSecondary)
 
         // Set the color for the drawer icons
-        Observables
-                .combineLatest(colors.theme, colors.textSecondary, { theme, textSecondary ->
-                    ColorStateList(states, intArrayOf(theme, textSecondary))
-                })
-                .doOnNext { tintList -> inboxIcon.imageTintList = tintList }
-                .doOnNext { tintList -> archivedIcon.imageTintList = tintList }
-                .doOnNext { tintList -> scheduledIcon.imageTintList = tintList }
-                .doOnNext { tintList -> settingsIcon.imageTintList = tintList }
-                .doOnNext { tintList -> plusIcon.imageTintList = tintList }
-                .doOnNext { tintList -> helpIcon.imageTintList = tintList }
-                .autoDisposable(scope())
-                .subscribe()
+        resolveThemeColor(android.R.attr.textColorSecondary)
+                .let { textSecondary -> ColorStateList(states, intArrayOf(colors.theme(), textSecondary)) }
+                .let { tintList ->
+                    inboxIcon.imageTintList = tintList
+                    archivedIcon.imageTintList = tintList
+                    scheduledIcon.imageTintList = tintList
+                    settingsIcon.imageTintList = tintList
+                    plusIcon.imageTintList = tintList
+                    helpIcon.imageTintList = tintList
+                }
 
         // Set the background highlight for the drawer options
-        colors.separator
-                .doOnNext { color -> inbox.background = rowBackground(color) }
-                .doOnNext { color -> archived.background = rowBackground(color) }
-                .doOnNext { color -> scheduled.background = rowBackground(color) }
-                .doOnNext { color -> rateLayout.setBackgroundTint(color) }
-                .autoDisposable(scope())
-                .subscribe()
+        val separator = resolveThemeColor(android.R.attr.divider)
+        inbox.background = rowBackground(separator)
+        archived.background = rowBackground(separator)
+        scheduled.background = rowBackground(separator)
+        rateLayout.setBackgroundTint(separator)
 
         conversationsAdapter.autoScrollToStart(recyclerView)
         conversationsAdapter.emptyView = empty
