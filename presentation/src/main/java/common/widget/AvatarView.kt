@@ -92,8 +92,8 @@ class AvatarView @JvmOverloads constructor(context: Context, attrs: AttributeSet
         updateView()
     }
 
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
+    override fun onFinishInflate() {
+        super.onFinishInflate()
 
         if (!isInEditMode) {
             setBackgroundTint(colors.theme(threadId))
@@ -101,13 +101,7 @@ class AvatarView @JvmOverloads constructor(context: Context, attrs: AttributeSet
             val initialColor = colors.textPrimaryOnTheme(threadId)
             initial.setTextColor(initialColor)
             icon.setTint(initialColor)
-        }
-    }
 
-    override fun onFinishInflate() {
-        super.onFinishInflate()
-
-        if (!isInEditMode) {
             updateView()
         }
     }

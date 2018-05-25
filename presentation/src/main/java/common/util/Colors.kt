@@ -67,6 +67,7 @@ class Colors @Inject constructor(private val context: Context, private val prefs
     fun theme(threadId: Long = 0): Int = prefs.theme(threadId).get()
 
     fun themeObservable(threadId: Long = 0): Observable<Int> = prefs.theme(threadId).asObservable()
+            .distinctUntilChanged()
 
     fun textPrimaryOnTheme(threadId: Long = 0): Int = theme(threadId)
             .let { color -> textPrimaryOnThemeForColor(color) }
