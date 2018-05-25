@@ -23,8 +23,6 @@ import android.app.AlertDialog
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.content.res.ColorStateList
-import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.StateListDrawable
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
@@ -43,7 +41,6 @@ import common.Navigator
 import common.base.QkThemedActivity
 import common.util.extensions.autoScrollToStart
 import common.util.extensions.dismissKeyboard
-import common.util.extensions.resolveThemeAttribute
 import common.util.extensions.resolveThemeColor
 import common.util.extensions.setBackgroundTint
 import common.util.extensions.setTint
@@ -124,18 +121,6 @@ class MainActivity : QkThemedActivity(), MainView {
 
         scheduled.isEnabled = false
 
-        val states = arrayOf(
-                intArrayOf(android.R.attr.state_selected),
-                intArrayOf(-android.R.attr.state_selected))
-
-        val rowBackground = { separator: Int ->
-            StateListDrawable().apply {
-                addState(intArrayOf(android.R.attr.state_selected), ColorDrawable(separator))
-                addState(intArrayOf(-android.R.attr.state_selected), getDrawable(resolveThemeAttribute(R.attr.selectableItemBackground)))
-                mutate()
-            }
-        }
-
         // Set the theme color tint to the progressbar and FAB
         colors.theme().let { theme ->
             syncingProgress.indeterminateTintList = ColorStateList.valueOf(theme)
@@ -154,6 +139,7 @@ class MainActivity : QkThemedActivity(), MainView {
         toggle.drawerArrowDrawable.color = resolveThemeColor(android.R.attr.textColorSecondary)
 
         // Set the color for the drawer icons
+        val states = arrayOf(intArrayOf(android.R.attr.state_selected), intArrayOf(-android.R.attr.state_selected))
         resolveThemeColor(android.R.attr.textColorSecondary)
                 .let { textSecondary -> ColorStateList(states, intArrayOf(colors.theme(), textSecondary)) }
                 .let { tintList ->
@@ -164,13 +150,6 @@ class MainActivity : QkThemedActivity(), MainView {
                     plusIcon.imageTintList = tintList
                     helpIcon.imageTintList = tintList
                 }
-
-        // Set the background highlight for the drawer options
-        val separator = resolveThemeColor(android.R.attr.divider)
-        inbox.background = rowBackground(separator)
-        archived.background = rowBackground(separator)
-        scheduled.background = rowBackground(separator)
-        rateLayout.setBackgroundTint(separator)
 
         conversationsAdapter.autoScrollToStart(recyclerView)
         conversationsAdapter.emptyView = empty

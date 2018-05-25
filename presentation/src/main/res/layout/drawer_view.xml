@@ -147,7 +147,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:background="@drawable/rounded_rectangle_outline_2dp"
-        android:backgroundTint="@color/separatorLight">
+        android:backgroundTint="?android:attr/divider">
 
         <ImageView
             android:id="@+id/rateIcon"
