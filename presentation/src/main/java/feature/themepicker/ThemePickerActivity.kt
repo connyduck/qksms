@@ -77,8 +77,6 @@ class ThemePickerActivity : QkThemedActivity(), ThemePickerView {
     override fun render(state: ThemePickerState) {
         tabs.setThreadId(state.threadId)
 
-        themeAdapter.threadId = state.threadId
-
         hex.setText(Integer.toHexString(state.newColor).takeLast(6))
 
         applyGroup.setVisible(state.applyThemeVisible)

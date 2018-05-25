@@ -44,12 +44,6 @@ class ThemeAdapter @Inject constructor(
         private val colors: Colors
 ) : QkAdapter<List<Int>>() {
 
-    var threadId: Long = 0
-        set(value) {
-            field = value
-            iconTint = colors.textPrimaryOnTheme(threadId)
-        }
-
     val colorSelected: Subject<Int> = PublishSubject.create()
 
     var selectedColor: Int = -1
@@ -58,6 +52,7 @@ class ThemeAdapter @Inject constructor(
             val newPosition = data.indexOfFirst { it.contains(value) }
 
             field = value
+            iconTint = colors.textPrimaryOnThemeForColor(value)
 
             oldPosition.takeIf { it != -1 }?.let { position -> notifyItemChanged(position) }
             newPosition.takeIf { it != -1 }?.let { position -> notifyItemChanged(position) }
