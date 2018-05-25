@@ -60,7 +60,7 @@ abstract class QkThemedActivity : QkActivity() {
      */
     protected val theme = threadId
             .distinctUntilChanged()
-            .map { threadId -> colors.theme(threadId) }
+            .switchMap { threadId -> colors.themeObservable(threadId) }
 
     @SuppressLint("InlinedApi")
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -119,8 +119,8 @@ class MessagesAdapter @Inject constructor(
     private val expanded = HashMap<Long, Boolean>()
     private val disposables = CompositeDisposable()
 
-    private var theme = colors.theme()
-    private var textPrimaryOnTheme = colors.textPrimaryOnTheme()
+    var theme = colors.theme()
+    var textPrimaryOnTheme = colors.textPrimaryOnTheme()
 
     /**
      * If the viewType is negative, then the viewHolder has an attachment. We'll consider
