@@ -46,6 +46,17 @@ class AvatarView @JvmOverloads constructor(context: Context, attrs: AttributeSet
      * This value can be changes if we should use the theme from a particular conversation
      */
     var threadId: Long = 0
+        set(value) {
+            if (field == value) return
+
+            field = value
+
+            setBackgroundTint(colors.theme(value))
+
+            val initialColor = colors.textPrimaryOnTheme(value)
+            initial.setTextColor(initialColor)
+            icon.setTint(initialColor)
+        }
 
     private var lookupKey: String? = null
     private var name: String? = null
